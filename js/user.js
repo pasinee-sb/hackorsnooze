@@ -31,8 +31,8 @@ $loginForm.on("submit", login);
 
 /** Handle signup form submission. */
 
-async function signup(evt) {
-  console.debug("signup", evt);
+async function createAccount(evt) {
+  console.debug("createAccount", evt);
   evt.preventDefault();
 
   const name = $("#signup-name").val();
@@ -41,6 +41,7 @@ async function signup(evt) {
 
   // User.signup retrieves user info from API and returns User instance
   // which we'll make the globally-available, logged-in user.
+ 
   currentUser = await User.signup(username, password, name);
 
   saveUserCredentialsInLocalStorage();
@@ -49,7 +50,7 @@ async function signup(evt) {
   $signupForm.trigger("reset");
 }
 
-$signupForm.on("submit", signup);
+$signupForm.on("submit", createAccount);
 
 /** Handle click of logout button
  *
@@ -76,6 +77,7 @@ async function checkForRememberedUser() {
   console.debug("checkForRememberedUser");
   const token = localStorage.getItem("token");
   const username = localStorage.getItem("username");
+  // const favorite = localStorage.getItem("favorites");
   if (!token || !username) return false;
 
   // try to log in with these credentials (will be null if login failed)
@@ -93,6 +95,7 @@ function saveUserCredentialsInLocalStorage() {
   if (currentUser) {
     localStorage.setItem("token", currentUser.loginToken);
     localStorage.setItem("username", currentUser.username);
+    // localStorage.setItem("favorites", currentUser.favorites);
   }
 }
 
@@ -109,8 +112,25 @@ function saveUserCredentialsInLocalStorage() {
 
 function updateUIOnUserLogin() {
   console.debug("updateUIOnUserLogin");
+  hidePageComponents();
 
+  
+  // re-display stories (so that "favorite" stars can appear)
+ 
+  putStoriesOnPage();
   $allStoriesList.show();
 
   updateNavOnLogin();
+  generateUserProfile();
+  // $(".star").show();
+}
+
+/** Show a "user profile" part of page built from the current user's info. */
+
+function generateUserProfile() {
+  console.debug("generateUserProfile");
+
+  $("#profile-name").text(currentUser.name);
+  $("#profile-username").text(currentUser.username);
+  $("#profile-account-date").text(currentUser.createdAt.slice(0, 10));
 }

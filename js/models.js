@@ -25,7 +25,10 @@ class Story {
 
   getHostName() {
     // UNIMPLEMENTED: complete this function!
-    return "hostname.com";
+   let myUrl = new URL(this.url);
+  return myUrl.hostname;
+  //  return myUrl.hostname;
+    // return "hostname.com";
   }
 }
 
@@ -61,6 +64,7 @@ class StoryList {
 
     // turn plain old story objects from API into instances of Story class
     const stories = response.data.stories.map(story => new Story(story));
+   
 
     // build an instance of our own class using the new array of stories
     return new StoryList(stories);
@@ -90,7 +94,32 @@ class StoryList {
     return story;
     // UNIMPLEMENTED: complete this function!
   }
-}
+    /** Delete story from API and remove from the story lists.
+   *
+   * - user: the current User instance
+   * - storyId: the ID of the story you want to remove
+   */
+
+    async removeStory(user, storyId) {
+      const token = user.loginToken;
+      await axios({
+        url: `${BASE_URL}/stories/${storyId}`,
+        method: "DELETE",
+        data: { token: user.loginToken }
+      });
+  
+      // filter out the story whose ID we are removing
+      this.stories = this.stories.filter(story => story.storyId !== storyId);
+  
+      // do the same thing for the user's list of stories & their favorites
+      user.ownStories = user.ownStories.filter(s => s.storyId !== storyId);
+      user.favorites = user.favorites.filter(s => s.storyId !== storyId);
+    }
+
+   
+
+  }
+  
 
 
 /******************************************************************************
@@ -131,6 +160,13 @@ class User {
    */
 
   static async signup(username, password, name) {
+    //to find out how to check duplicate username, requires token??
+// const existingUser = await axios({
+//   url: `${BASE_URL}/users?skip=0&limit=25`,
+//   method: "GET",
+// })
+// console.log(existingUser);
+
     const response = await axios({
       url: `${BASE_URL}/signup`,
       method: "POST",
@@ -207,4 +243,55 @@ class User {
       return null;
     }
   }
+    /** Add a story to the list of user favorites and update the API
+   * - story: a Story instance to add to favorites
+   */
+
+  async addFavorite(story){
+    this.favorites.push(story);
+    await this._addOrRemoveFav("add", story);
+  }
+  /** Remove a story to the list of user favorites and update the API
+   * - story: the Story instance to remove from favorites
+   */
+
+  async removeFavorite(story){
+    this.favorites = this.favorites.filter(s=> s.storyId !== story.storyId);
+    await this._addOrRemoveFav("remove", story);
+  }
+
+  async _addOrRemoveFav(newState, story) {
+    const method = newState === "add" ? "POST" : "DELETE";
+    const token = this.loginToken;
+    await axios({
+      url: `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
+      method: method,
+      data: { token },
+    });
+  }
+
+ 
+    //update story to API
+
+    async updateStory(user, {author, title, url},storyId){
+      const token = user.loginToken;
+  // const myStory =  user.ownStories.find(s=> s.storyId === storyId);
+  
+      await axios ({
+        url: `${BASE_URL}/stories/${storyId}`,
+        method: "PATCH",
+        data: { token, story:{author, title, url} },
+      })
+    }
+  /** Return true/false if given Story instance is a favorite of this user. */
+
+  isFavorite(story) {
+    return this.favorites.some(s => (s.storyId === story.storyId));
+  }
+
+  isOwnStory(story){
+    return this.ownStories.some(s=>(s.storyId=== story.storyId ))
+  }
+
+
 }

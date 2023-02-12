@@ -21,6 +21,7 @@
   <title>Hack or Snooze</title>
   <link
       rel="stylesheet"
+     
       href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
       integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
       crossorigin="anonymous">
@@ -37,6 +38,9 @@
   <div class="navbar-brand">
     <a class="nav-link" href="#" id="nav-all">Hack or Snooze</a>
     <a class = "nav-link hidden" href="#" id="nav-story"> Submit </a>
+    <a class="nav-link hidden" href="#" id="nav-favorites">favorites</a>
+    |
+    <a class="nav-link hidden" href="#" id="nav-my-stories">my&nbsp;stories</a>
   </div>
   
   <div class="nav-right">
@@ -55,14 +59,21 @@
   <!-- List of all stories -->
   <ol id="all-stories-list" class="stories-list"></ol>
 
+    <!-- List of stories favorited by the user -->
+    <ol id="favorited-stories" class="hidden stories-list"></ol>
+
+    <!-- List of stories by the user -->
+    <ol id="my-stories" class="hidden stories-list"></ol>
+
 </section>
 
 <!-- Login and signup forms -->
 <section class="account-forms-container container">
 
 <!--Story Submit form-->
+<section id="story-form" class="hidden">
 
-<form action="#" id="story-form" class="account-form hidden" method="post">
+<form action="#"   method="post">
   <h4>Submit your story</h4>
   <div class="author-input">
     <label for="author">Author</label>
@@ -78,7 +89,27 @@
   </div>
   <button type="submit">Submit</button>
 </form>
+</section>
+<!--Story Edit form-->
+<section id="story-edit-form" class="hidden">
 
+  <form action="#"   method="patch">
+    <h4>Submit your story</h4>
+    <div class="author-input">
+      <label for="author">Author</label>
+      <input id="author1"type="text">
+    </div>
+    <div class="title-input"> 
+      <label for="title">Title</label>
+      <input id= "title1"type="text">
+    </div>
+    <div class="url-input"> 
+      <label for="url">URL</label>
+      <input id= "url1"type="text">
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+  </section>
   <!-- Login form -->
   <form action="#" id="login-form" class="account-form hidden" method="post">
     <h4>Login</h4>
@@ -115,6 +146,18 @@
     </div>
     <button type="submit">create account</button>
   </form>
+</section>
+
+<!-- User profile -->
+<section id="user-profile" class="hidden">
+  <div class="user-profile-box container">
+    <h4>User Profile Info</h4>
+    <section>
+      <div>Name: <span id="profile-name">Name:</span></div>
+      <div>Username: <span id="profile-username">Username:</span></div>
+      <div>Account Created: <span id="profile-account-date"></span></div>
+    </section>
+  </div>
 </section>
 
 <!-- Library JS & our JS -->
