@@ -5,23 +5,33 @@
 const $body = $("body");
 
 const $storiesLoadingMsg = $("#stories-loading-msg");
-const $allStoriesList = $("#all-stories-list");
-const $ownStories = $("#my-stories");
+
 
 // selector that finds all three story lists
 const $storiesLists = $(".stories-list");
+const $allStoriesList = $("#all-stories-list");
+const $ownStories = $("#my-stories");
+const $favoritedStories = $("#favorited-stories");
 
+
+// selector that finds all the forms
 const $loginForm = $("#login-form");
 const $signupForm = $("#signup-form");
+const $storyForm = $("#story-form");
 
+
+// selector that finds all the navs
 const $navLogin = $("#nav-login");
 const $navUserProfile = $("#nav-user-profile");
 const $navLogOut = $("#nav-logout");
-const $storyForm = $("#story-form");
 const $navStory = $("#nav-story");
-const $navAll = $("#nav-all")
+const $navAll = $("#nav-all");
+const $navFav = $("#nav-favorites");
+const $navMyStories =  $("#nav-my-stories");
+
+// selector that finds favorites- related 
 const $star = $(".far");
-const $favoritedStories = $("#favorited-stories");
+
 
 const $userProfile = $("#user-profile");
 

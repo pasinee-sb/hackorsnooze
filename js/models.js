@@ -116,7 +116,17 @@ class StoryList {
       user.favorites = user.favorites.filter(s => s.storyId !== storyId);
     }
 
-   
+    //update story to API
+
+    async updateStory(user, {author, title, url},storyId){
+      const token = user.loginToken;  
+      await axios ({
+        url: `${BASE_URL}/stories/${storyId}`,
+        method: "PATCH",
+        data: { token, story:{author, title, url} },
+      })
+    }
+
 
   }
   
@@ -256,6 +266,7 @@ class User {
    */
 
   async removeFavorite(story){
+    
     this.favorites = this.favorites.filter(s=> s.storyId !== story.storyId);
     await this._addOrRemoveFav("remove", story);
   }
@@ -270,25 +281,12 @@ class User {
     });
   }
 
- 
-    //update story to API
-
-    async updateStory(user, {author, title, url},storyId){
-      const token = user.loginToken;
-  // const myStory =  user.ownStories.find(s=> s.storyId === storyId);
-  
-      await axios ({
-        url: `${BASE_URL}/stories/${storyId}`,
-        method: "PATCH",
-        data: { token, story:{author, title, url} },
-      })
-    }
   /** Return true/false if given Story instance is a favorite of this user. */
-
   isFavorite(story) {
     return this.favorites.some(s => (s.storyId === story.storyId));
   }
 
+    /** Return true/false if given Story instance is a story of this user. */
   isOwnStory(story){
     return this.ownStories.some(s=>(s.storyId=== story.storyId ))
   }

@@ -2,13 +2,15 @@
 
 // This is the global list of the stories, an instance of StoryList
 let storyList;
+let storyIdEdit;
+
+
 
 /** Get and show stories when site first loads. */
 
 async function getAndShowStoriesOnStart() {
   storyList = await StoryList.getStories();
   $storiesLoadingMsg.remove();
-
   putStoriesOnPage();
 }
 
@@ -20,27 +22,23 @@ async function getAndShowStoriesOnStart() {
  * Returns the markup for the story.
  */
 
-function generateStoryMarkup(story, showDeleteBtn = false) {
-
-  
+function generateStoryMarkup(story) {
 
   const hostName = story.getHostName();
-    // if a user is logged in, show favorite/not-favorite star
-  
-  const showStar = Boolean(currentUser);
-  // const showEdit = Boolean(currentUser.ownStories.length!==0);
-   const showEdit = Boolean(currentUser.isOwnStory(story));
 
+    // if a user is logged in, show favorite/not-favorite star, edit button and trash can for deletion
+  
+  const showStarEditTrash = Boolean(currentUser);
+ 
+
+//   // if a user is logged in, show edit button 
 
   return $(`
       <li id="${story.storyId}">
-      ${showDeleteBtn ? getDeleteBtnHTML() : ""}
-      ${showStar ? getStarHTML(story, currentUser) : ""}
-      ${showEdit? getPencil(story, currentUser) : ""}
-   
-
-
-        <a href="${story.url}" target="a_blank" class="story-link">
+      ${showStarEditTrash ? getTrashCan(story, currentUser): ""}
+    ${showStarEditTrash  ? getStarHTML(story, currentUser) : ""}
+      ${showStarEditTrash ? getPencil(story, currentUser) : ""}
+    <a href="${story.url}" target="a_blank" class="story-link">
           ${story.title}
         </a>
         <small class="story-hostname">(${hostName})</small>
@@ -50,11 +48,8 @@ function generateStoryMarkup(story, showDeleteBtn = false) {
     `);
 }
 
-/** Make delete button HTML for story */
 
-function getDeleteBtnHTML() {
-  return `<span class="trash-can"><i class="fas fa-trash-alt"></i></span>`;
-}
+
 
 
 /** Make favorite/not-favorite star for story */
@@ -68,62 +63,92 @@ function getStarHTML(story, user) {
       </span>`;
 }
 
-
-/** Gets list of stories from server, generates their HTML, and puts on page. */
-
-function putStoriesOnPage() {
-  console.debug("putStoriesOnPage");
-
-  $allStoriesList.empty();
-
-  // loop through all of our stories and generate HTML for them
-  for (let story of storyList.stories) {
-    const $story = generateStoryMarkup(story);
-    $allStoriesList.append($story);
-  }
-
-  $allStoriesList.show();
+/** Make delete button HTML for story */
+function getTrashCan(story, user){
+  const isOwnStory = user.isOwnStory(story);
+const addTrash = isOwnStory? `<span class="trash-can"><i class="fas fa-trash-alt"></i></span>` : "";
+return   addTrash
 }
+
+/** Make edit button HTML for story */
+function getPencil(story, user){
+const isOwnStory = user.isOwnStory(story);
+const addPencil = isOwnStory? `<i class="fas fa-edit"></i>` : "";
+return addPencil;
+}
+
+/** Handle favorite/un-favorite a story */
+
+async function favStory(evt){
+  console.debug("favStory");
+  const $picked = $(evt.target);
+  const $pickedFav = $picked.closest("li");
+  const pickedId = $pickedFav.attr("id");
+  const story = storyList.stories.find(s => s.storyId === pickedId )
+ 
+  if($picked.hasClass('fas')){
+    await currentUser.removeFavorite(story);
+$picked.closest('i').toggleClass('fas far');
+}
+    else {
+      await currentUser.addFavorite(story);
+      $picked.closest('i').toggleClass('fas far');
+    }
+
+
+    // re-generate story list depends on which page you are on 
+if($ownStories.is(":visible")){
+  putUserStoriesOnPage();
+}
+else if($favoritedStories.is(":visible")) {
+putFavoritesListOnPage();
+}
+// else  {
+// await start();
+// }
+}
+$body.on("click", ".star", favStory);
+
 
 /** Handle deleting a story. */
 
 async function deleteStory(evt) {
   console.debug("deleteStory");
-
-  const $closestLi = $(evt.target).closest("li");
+const $closestLi = $(evt.target).closest("li");
   const storyId = $closestLi.attr("id");
+await storyList.removeStory(currentUser, storyId);
 
-  await storyList.removeStory(currentUser, storyId);
-
-  // re-generate story list
-  await putUserStoriesOnPage();
+// re-generate story list depends on which page you are on 
+if($ownStories.is(":visible")){
+    putUserStoriesOnPage();
+}
+else if($favoritedStories.is(":visible")) {
+putFavoritesListOnPage();
+}
+else  {
+await start();
+}
 }
 
-$ownStories.on("click", ".trash-can", deleteStory);
+$body.on("click",".trash-can", deleteStory);
 
 
 
-/** Handle submitting new story form. */
-
+/** Handle filling new story form. */
 function fillStory() {
   console.debug("fillStory")
   hidePageComponents();
+  
   $storyForm.show();
-  
-  
 }
-
 
 $("#nav-story").on("click", fillStory);
 
-//waiting to be debugged
-
+/** Handle submitting new story form. *///further work underway
 async function submitStory(evt){
   console.debug("submitStory");
   evt.preventDefault();
-
-  
-  // grab all info from form
+// grab all info from form
 const title = $("#title").val();
 const author = $("#author").val();
 const url = $("#url").val();
@@ -133,21 +158,63 @@ const data = {author, title, url, userName};
 //storyList is an array, and an instance of Object StoryList 
 
 const story = await storyList.addStory(currentUser, data);
-console.log(story);
-
 const $story = generateStoryMarkup(story);
-
 $allStoriesList.prepend($story);
-
 // hide the form and reset it
 $storyForm.slideUp("slow");
 $storyForm.trigger("reset");
 navAllStories();
-
-
 }
 
 $storyForm.on("submit", submitStory);
+
+
+/** Handle editing a story */
+async function editStory(evt){
+
+  console.debug('editStory');
+  const $storyIdToEdit = evt.target.closest('li').id;
+  storyIdEdit = $storyIdToEdit;
+  const story = storyList.stories.find(s => s.storyId === storyIdEdit );
+  
+  
+  hidePageComponents();
+  $("#story-edit-form").show();
+  $("#story-edit-form").find("#author1").val(`${story.author}`);
+  $("#story-edit-form").find("#title1").val(`${story.title}`);
+  $("#story-edit-form").find("#url1").val(`${story.url}`);
+  
+  }
+  $body.on("click",".fa-edit", editStory)
+
+  async function submitEdit(evt){
+    console.debug("submitEdit");
+    evt.preventDefault();
+   
+    // grab all info from form
+  const title = $("#title1").val();
+  const author = $("#author1").val();
+  const url = $("#url1").val();
+  
+  
+  //storyList is an array, and an instance of Object StoryList 
+  const editedStory = await storyList.updateStory(currentUser, {author, title, url},storyIdEdit);
+  console.log(editedStory);
+  
+  // const $story = generateStoryMarkup(story);
+  
+  // $allStoriesList.prepend($story);
+  
+  // // hide the form and reset it
+  // $storyForm.slideUp("slow");
+  // $storyForm.trigger("reset");
+  // navAllStories();
+  
+  }
+  
+  $("#story-edit-form").on("submit", submitEdit)
+
+
 
 
 /******************************************************************************
@@ -164,7 +231,7 @@ function putUserStoriesOnPage() {
   } else {
     // loop through all of users stories and generate HTML for them
     for (let story of currentUser.ownStories) {
-      let $story = generateStoryMarkup(story, true);
+      let $story = generateStoryMarkup(story);
       $ownStories.append($story);
     }
   }
@@ -195,108 +262,23 @@ function putFavoritesListOnPage() {
 
  $favoritedStories.show();
 }
+/** Gets list of stories from server, generates their HTML, and puts on page. */
 
-/** Handle favorite/un-favorite a story */
+function putStoriesOnPage() {
+  console.debug("putStoriesOnPage");
 
-async function favStory(evt){
-  console.debug("favStory");
-  const $picked = $(evt.target);
-  const $pickedFav = $picked.closest("li");
-  const pickedId = $pickedFav.attr("id");
-  const story = storyList.stories.find(s => s.storyId === pickedId )
- 
-  if($picked.hasClass('fas')){
-    
-await currentUser.removeFavorite(story);
-$picked.closest('i').toggleClass('fas far');
+  $allStoriesList.empty();
 
+  // loop through all of our stories and generate HTML for them
+  for (let story of storyList.stories) {
+    const $story = generateStoryMarkup(story);
+    $allStoriesList.append($story);
+  }
 
-    }
-    else {
-      await currentUser.addFavorite(story);
-      $picked.closest('i').toggleClass('fas far');
-     
-   
-    }
-
-    //up date favorite list when toggling favorites
- 
-   
- 
-}
-
-$body.on("click", ".star", favStory);
-
-
-
-// function getStarHTML(story, user) {
-//   const isFavorite = user.isFavorite(story);
-//   const starType = isFavorite ? "fas" : "far";
-//   return `
-//       <span class="star">
-//         <i class="${starType} fa-star"></i>
-//       </span>`;
-// }
-
-function getPencil(story, user){
-const isOwnStory = user.isOwnStory(story);
-const addPencil = isOwnStory? `<i class="fas fa-edit"></i>` : "";
-return addPencil;
-}
-
-async function editStory(evt){
-
-
-
-console.debug('editStory');
-const $storyIdToEdit = evt.target.closest('li').id;
-const story = storyList.stories.find(s => s.storyId === $storyIdToEdit );
-
-// console.log(story);
-hidePageComponents();
-$("#story-edit-form").show();
-// console.log($storyForm);
-$("#story-edit-form").find("#author1").val(`${story.author}`);
-$("#story-edit-form").find("#title1").val(`${story.title}`);
-$("#story-edit-form").find("#url1").val(`${story.url}`);
-
-// return {data, $storyIdToEdit}
-async function submitEdit(evt){
-  console.debug("submitEdit");
-  evt.preventDefault();
- 
-
-  
-  // grab all info from form
-const title = $("#title1").val();
-const author = $("#author1").val();
-const url = $("#url1").val();
-// const data = {author, title, url};
-// const userName = currentUser.username;
-
-
-//storyList is an array, and an instance of Object StoryList 
-const editedStory = await currentUser.updateStory(currentUser, {author, title, url},$storyIdToEdit);
-console.log(editedStory);
-
-// const $story = generateStoryMarkup(story);
-
-// $allStoriesList.prepend($story);
-
-// // hide the form and reset it
-// $storyForm.slideUp("slow");
-// $storyForm.trigger("reset");
-// navAllStories();
-
-}
-
-$("#story-edit-form").on("submit", submitEdit)
-
+  $allStoriesList.show();
 }
 
 
-
-$body.on("click",".fa-edit", editStory)
 
 
 
