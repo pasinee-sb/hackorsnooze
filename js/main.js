@@ -7,7 +7,7 @@ const $body = $("body");
 const $storiesLoadingMsg = $("#stories-loading-msg");
 
 
-// selector that finds all three story lists
+// selector that finds all story lists
 const $storiesLists = $(".stories-list");
 const $allStoriesList = $("#all-stories-list");
 const $ownStories = $("#my-stories");
@@ -29,10 +29,10 @@ const $navAll = $("#nav-all");
 const $navFav = $("#nav-favorites");
 const $navMyStories =  $("#nav-my-stories");
 
-// selector that finds favorites- related 
+// selector that finds favorites
 const $star = $(".far");
 
-
+// selector that finds user profile
 const $userProfile = $("#user-profile");
 
 

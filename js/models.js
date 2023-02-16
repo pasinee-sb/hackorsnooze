@@ -24,11 +24,10 @@ class Story {
   /** Parses hostname out of URL and returns it. */
 
   getHostName() {
-    // UNIMPLEMENTED: complete this function!
+
    let myUrl = new URL(this.url);
   return myUrl.hostname;
-  //  return myUrl.hostname;
-    // return "hostname.com";
+
   }
 }
 
@@ -84,9 +83,7 @@ class StoryList {
     const response2 = await axios({ url: `${BASE_URL}/stories`,
     method: "POST", data:{token, story:{author, title, url}}
     } );
-    // console.log(user);
-
-    // return new Story(response2.data.story);
+   
     const story = new Story(response2.data.story);
     this.stories.unshift(story);
     user.ownStories.unshift(story);
@@ -105,7 +102,7 @@ class StoryList {
       await axios({
         url: `${BASE_URL}/stories/${storyId}`,
         method: "DELETE",
-        data: { token: user.loginToken }
+        data: {token}
       });
   
       // filter out the story whose ID we are removing
@@ -116,18 +113,17 @@ class StoryList {
       user.favorites = user.favorites.filter(s => s.storyId !== storyId);
     }
 
-    //update story to API
+    //update story to API, to be debugged
 
     async updateStory(user, {author, title, url},storyId){
       const token = user.loginToken;  
-      await axios ({
+      const response = await axios ({
         url: `${BASE_URL}/stories/${storyId}`,
         method: "PATCH",
         data: { token, story:{author, title, url} },
       })
+      console.log(response);
     }
-
-
   }
   
 

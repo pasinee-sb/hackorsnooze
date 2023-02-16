@@ -2,8 +2,9 @@
 
 // This is the global list of the stories, an instance of StoryList
 let storyList;
-let storyIdEdit;
 
+// StoryIdEdit will be used for grabbing id for each story that needs editing
+let storyIdEdit;
 
 
 /** Get and show stories when site first loads. */
@@ -31,7 +32,7 @@ function generateStoryMarkup(story) {
   const showStarEditTrash = Boolean(currentUser);
  
 
-//   // if a user is logged in, show edit button 
+ // if a user is logged in, show edit, trash and edit button 
 
   return $(`
       <li id="${story.storyId}">
@@ -48,9 +49,21 @@ function generateStoryMarkup(story) {
     `);
 }
 
+/** Gets list of stories from server, generates their HTML, and puts on page. */
 
+function putStoriesOnPage() {
+  console.debug("putStoriesOnPage");
 
+  $allStoriesList.empty();
 
+  // loop through all of our stories and generate HTML for them
+  for (let story of storyList.stories) {
+    const $story = generateStoryMarkup(story);
+    $allStoriesList.append($story);
+  }
+
+  $allStoriesList.show();
+}
 
 /** Make favorite/not-favorite star for story */
 
@@ -95,17 +108,13 @@ $picked.closest('i').toggleClass('fas far');
       $picked.closest('i').toggleClass('fas far');
     }
 
+// re-generate story list spontaneously on favortie list page
 
-    // re-generate story list depends on which page you are on 
-if($ownStories.is(":visible")){
-  putUserStoriesOnPage();
-}
-else if($favoritedStories.is(":visible")) {
+if($favoritedStories.is(":visible")) {
 putFavoritesListOnPage();
 }
-// else  {
-// await start();
-// }
+return
+
 }
 $body.on("click", ".star", favStory);
 
@@ -118,7 +127,7 @@ const $closestLi = $(evt.target).closest("li");
   const storyId = $closestLi.attr("id");
 await storyList.removeStory(currentUser, storyId);
 
-// re-generate story list depends on which page you are on 
+// re-generate story list spontaneously depends on which list is showing
 if($ownStories.is(":visible")){
     putUserStoriesOnPage();
 }
@@ -126,7 +135,7 @@ else if($favoritedStories.is(":visible")) {
 putFavoritesListOnPage();
 }
 else  {
-await start();
+putStoriesOnPage();
 }
 }
 
@@ -144,7 +153,7 @@ function fillStory() {
 
 $("#nav-story").on("click", fillStory);
 
-/** Handle submitting new story form. *///further work underway
+/** Handle submitting new story form. */
 async function submitStory(evt){
   console.debug("submitStory");
   evt.preventDefault();
@@ -161,7 +170,7 @@ const story = await storyList.addStory(currentUser, data);
 const $story = generateStoryMarkup(story);
 $allStoriesList.prepend($story);
 // hide the form and reset it
-$storyForm.slideUp("slow");
+
 $storyForm.trigger("reset");
 navAllStories();
 }
@@ -169,7 +178,7 @@ navAllStories();
 $storyForm.on("submit", submitStory);
 
 
-/** Handle editing a story */
+/** Handle editing a story  furhter work underway*/
 async function editStory(evt){
 
   console.debug('editStory');
@@ -195,20 +204,10 @@ async function editStory(evt){
   const title = $("#title1").val();
   const author = $("#author1").val();
   const url = $("#url1").val();
-  
-  
-  //storyList is an array, and an instance of Object StoryList 
+  //to be deugged
   const editedStory = await storyList.updateStory(currentUser, {author, title, url},storyIdEdit);
   console.log(editedStory);
   
-  // const $story = generateStoryMarkup(story);
-  
-  // $allStoriesList.prepend($story);
-  
-  // // hide the form and reset it
-  // $storyForm.slideUp("slow");
-  // $storyForm.trigger("reset");
-  // navAllStories();
   
   }
   
@@ -262,21 +261,7 @@ function putFavoritesListOnPage() {
 
  $favoritedStories.show();
 }
-/** Gets list of stories from server, generates their HTML, and puts on page. */
 
-function putStoriesOnPage() {
-  console.debug("putStoriesOnPage");
-
-  $allStoriesList.empty();
-
-  // loop through all of our stories and generate HTML for them
-  for (let story of storyList.stories) {
-    const $story = generateStoryMarkup(story);
-    $allStoriesList.append($story);
-  }
-
-  $allStoriesList.show();
-}
 
 
 
