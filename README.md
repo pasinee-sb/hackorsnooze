@@ -1,9 +1,9 @@
 Hack Or Snooze - AJAX-API exercise
-Description
+
+
 Allows users to access articles via Hack or Snooze API Users can create their own user profile, create and manage their favorites, and submit and delete their own articles.
 
-ToDo
-jasmine testing
+
 Further Study
 Add some error handling for when a username has already been taken or if credentials are incorrect!
 Allow users to edit stories they have created.
