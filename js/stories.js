@@ -204,6 +204,7 @@ async function editStory(evt){
   const title = $("#title1").val();
   const author = $("#author1").val();
   const url = $("#url1").val();
+
   //to be deugged
   const editedStory = await storyList.updateStory(currentUser, {author, title, url},storyIdEdit);
   console.log(editedStory);

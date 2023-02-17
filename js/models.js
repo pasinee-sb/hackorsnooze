@@ -1,5 +1,6 @@
 "use strict";
 
+
 const BASE_URL = "https://hack-or-snooze-v3.herokuapp.com";
 
 /******************************************************************************
@@ -89,7 +90,7 @@ class StoryList {
     user.ownStories.unshift(story);
 
     return story;
-    // UNIMPLEMENTED: complete this function!
+
   }
     /** Delete story from API and remove from the story lists.
    *
@@ -115,15 +116,30 @@ class StoryList {
 
     //update story to API, to be debugged
 
-    async updateStory(user, {author, title, url},storyId){
-      const token = user.loginToken;  
-      const response = await axios ({
-        url: `${BASE_URL}/stories/${storyId}`,
-        method: "PATCH",
-        data: { token, story:{author, title, url} },
-      })
+    async updateStory(user, {author, title, url}, storyId) {
+      const token = user.loginToken;
+      const response = await axios.patch(`${BASE_URL}/stories/${storyId}`, {
+      token,
+      story: { author, title, url }
+      }, {
+      headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'PATCH'
+      }
+      });
       console.log(response);
-    }
+      }
+
+    // async updateStory(user, {author, title, url},storyId){
+    //   const token = user.loginToken;  
+    //   const response = await axios ({
+    //     url: `${BASE_URL}/stories/${storyId}`,
+    //     method: "PATCH",
+    //     data: { token, story:{author, title, url} },
+    //   })
+    //   console.log(response);
+    // }
   }
   
 
