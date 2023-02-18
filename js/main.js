@@ -18,6 +18,7 @@ const $favoritedStories = $("#favorited-stories");
 const $loginForm = $("#login-form");
 const $signupForm = $("#signup-form");
 const $storyForm = $("#story-form");
+const $stroryEditForm = $("#story-edit-form");
 
 
 // selector that finds all the navs
@@ -43,13 +44,16 @@ const $userProfile = $("#user-profile");
  */
 
 function hidePageComponents() {
+  console.debug("hidePageComponents")
   const components = [
     $allStoriesList,
     $storyForm,
     $loginForm,
     $signupForm,
     $userProfile,
-    $storiesLists
+    $storiesLists,
+    $stroryEditForm
+    
 
   ];
   components.forEach(c => c.hide());

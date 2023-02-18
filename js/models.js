@@ -116,30 +116,23 @@ class StoryList {
 
     //update story to API, to be debugged
 
-    async updateStory(user, {author, title, url}, storyId) {
-      const token = user.loginToken;
-      const response = await axios.patch(`${BASE_URL}/stories/${storyId}`, {
-      token,
-      story: { author, title, url }
-      }, {
-      headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'PATCH'
-      }
-      });
-      console.log(response);
-      }
-
-    // async updateStory(user, {author, title, url},storyId){
-    //   const token = user.loginToken;  
-    //   const response = await axios ({
-    //     url: `${BASE_URL}/stories/${storyId}`,
-    //     method: "PATCH",
-    //     data: { token, story:{author, title, url} },
+    // async updateStory(user, {author, title, url}, storyId) {
+    //   const token = user.loginToken;
+    // await axios.patch(`${BASE_URL}/stories/${storyId}`, {
+    //   token,
+    //   story: { author, title, url }
     //   })
-    //   console.log(response);
     // }
+
+    async updateStory(user, {author, title, url},storyId){
+      const token = user.loginToken;  
+      const response = await axios ({
+        url: `${BASE_URL}/stories/${storyId}`,
+        method: "PATCH",
+        data: { token, story:{author, title, url} },
+      })
+      console.log(response);
+    }
   }
   
 

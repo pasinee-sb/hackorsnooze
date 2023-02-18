@@ -199,17 +199,14 @@ async function editStory(evt){
   async function submitEdit(evt){
     console.debug("submitEdit");
     evt.preventDefault();
+    hidePageComponents();
    
     // grab all info from form
   const title = $("#title1").val();
   const author = $("#author1").val();
   const url = $("#url1").val();
-
-  //to be deugged
-  const editedStory = await storyList.updateStory(currentUser, {author, title, url},storyIdEdit);
-  console.log(editedStory);
-  
-  
+   await storyList.updateStory(currentUser, {author, title, url},storyIdEdit);
+   await getAndShowStoriesOnStart();
   }
   
   $("#story-edit-form").on("submit", submitEdit)
